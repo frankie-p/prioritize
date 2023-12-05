@@ -1,7 +1,7 @@
 ﻿
 using Prio;
 
-void WriteJson()
+Product GetCoupling()
 {
     Func<int> shippingTimeFunc = () => (int)Rand.Generate(10, 3);
 
@@ -73,12 +73,14 @@ void WriteJson()
         )
     ]
     };
+
+    return coupling;
 }
 
-var coupling = Newtonsoft.Json.JsonConvert.DeserializeObject<Product>(await File.ReadAllTextAsync("coutpling.blueprint.json"));
+var coupling = GetCoupling();
 
 var inventory = new InventoryManager();
-inventory.Add("W31-016", 1);
+//inventory.Add("W31-016", 1);
 
 var orderManager = new OrderManager(inventory);
 if (inventory.Remove(coupling, 1) == 1)
@@ -87,4 +89,6 @@ if (inventory.Remove(coupling, 1) == 1)
 var order = orderManager.Create(coupling, 1);
 
 var simulator = new Simulator();
-await simulator.SimulateAsync(order);
+simulator.AddOrder(order);
+
+await simulator.SimulateAsync();

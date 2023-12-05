@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34321.82
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prioritize", "Prioritize\Prioritize.csproj", "{5469B696-6240-47A5-AB01-AC97BA277AF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prioritize", "Prioritize\Prioritize.csproj", "{5469B696-6240-47A5-AB01-AC97BA277AF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D2BDC9EC-2CAF-4DE5-9A77-75F248D1E3DC}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

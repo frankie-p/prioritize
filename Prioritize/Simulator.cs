@@ -2,37 +2,60 @@
 
 public class Simulator
 {
+    private readonly List<Order> orders = new();
+
+    public event EventHandler<int> DayBegin;
 
     public int PriorizationsPerDay { get; init; } = 1;
 
     public Func<IEnumerable<Order>, Order> PrioritizingFunc { get; init; } = o => o.ElementAt(Rand.Next(o.Count()));
 
-    public async Task SimulateAsync(Order order)
+    public void AddOrder(Order order)
+        => orders.Add(order);
+
+    public async Task SimulateAsync()
     {
-        var top = Console.CursorTop;
-
+        var cursorBegin = Console.CursorTop;
+        var cursorEnd = 0;
         var day = 0;
-
+        
         while (true)
         {
-            Console.SetCursorPosition(0, top);
+            Console.SetCursorPosition(0, cursorBegin);
 
-            PrintLine($"Day {++day}:");
+            PrintLine($"Day {day}:");
 
-            DoPurchases(order);
-            DoShippings(order);
-            DoGoodsReceipt(order);
-            DoInternalProcesses(order);
+            DayBegin?.Invoke(this, day);
 
-            PrintOrders(order);
+            foreach (var order in orders)
+            {
+                DoPurchases(order);
+                DoShippings(order);
+                DoGoodsReceipt(order);
+                DoInternalProcesses(order);
 
-            if (order.ProcessState == ProcessStates.Done)
-                break;
+                PrintOrders(order);
+            }
+
+            orders.RemoveAll(o => o.ProcessState == ProcessStates.Done);
 
             await Task.Delay(1000);
-        }
 
-        Console.WriteLine("Simulation done");
+            day++;
+
+            if (Console.CursorTop < cursorEnd)
+            {
+                // clear remaining rows
+                while (Console.CursorTop < cursorEnd)
+                {
+                    PrintLine("");
+                }
+            }
+            else
+            {
+                cursorEnd = Console.CursorTop;
+            }
+        }
     }
 
     private void DoInternalProcesses(Order order)
