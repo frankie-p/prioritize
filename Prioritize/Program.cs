@@ -77,18 +77,20 @@ Product GetCoupling()
     return coupling;
 }
 
-var coupling = GetCoupling();
-
 var inventory = new InventoryManager();
 //inventory.Add("W31-016", 1);
 
 var orderManager = new OrderManager(inventory);
-if (inventory.Remove(coupling, 1) == 1)
-    return;
-
-var order = orderManager.Create(coupling, 1);
 
 var simulator = new Simulator();
-simulator.AddOrder(order);
+simulator.AddOrder(orderManager.Create(GetCoupling(), 1));
+
+simulator.DayBegin += (s, e) =>
+{
+    if (simulator.OrderCount < 5)
+    {
+        simulator.AddOrder(orderManager.Create(GetCoupling(), 1));
+    }
+};
 
 await simulator.SimulateAsync();

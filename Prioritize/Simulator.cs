@@ -10,6 +10,8 @@ public class Simulator
 
     public Func<IEnumerable<Order>, Order> PrioritizingFunc { get; init; } = o => o.ElementAt(Rand.Next(o.Count()));
 
+    public int OrderCount => orders.Count();
+
     public void AddOrder(Order order)
         => orders.Add(order);
 

@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Prio;
+﻿namespace Prio;
 
 public class OrderManager
 {
