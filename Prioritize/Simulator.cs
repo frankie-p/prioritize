@@ -1,4 +1,6 @@
-﻿namespace Prio;
+﻿using System.Net.Security;
+
+namespace Prio;
 
 public class Simulator
 {
@@ -35,9 +37,10 @@ public class Simulator
                 DoShippings(order);
                 DoGoodsReceipt(order);
                 DoInternalProcesses(order);
-
-                PrintOrders(order);
+                DecrementDeadline(order);
             }
+
+            PrintOrders();
 
             orders.RemoveAll(o => o.ProcessState == ProcessStates.Done);
 
@@ -57,6 +60,14 @@ public class Simulator
             {
                 cursorEnd = Console.CursorTop;
             }
+        }
+    }
+
+    private void DecrementDeadline(Order order)
+    {
+        foreach (var o in order.GetAllOrders())
+        {
+            o.Deadline--;
         }
     }
 
@@ -161,19 +172,46 @@ public class Simulator
         }
     }
 
-    private static void PrintOrders(Order order)
+    private void PrintOrders()
     {
-        PrintLine(order.ToString());
+        var maxLevel = orders.Max(s => s.GetAllOrders().Max(o => o.Level));
+        var maxNameLength = orders.Max(s => s.GetAllOrders().Max(o => o.Item.Name.Length));
+
+        foreach (var order in orders)
+        {
+            PrintOrder(order, maxLevel, maxNameLength);
+        }
+    }
+
+    private static void PrintOrder(Order order, int maxLevel, int maxNameLength)
+    {
+        PrintLine(
+            order.ToString(2 * (maxLevel - order.Level) + maxNameLength - order.Item.Name.Length),
+            foreground: order.Level == 0 ? ConsoleColor.Blue : null,
+            background: order.DaysLeft > order.Deadline ? ConsoleColor.DarkRed : null);
 
         if (order.HasSubOrders)
         {
             foreach (var subOrder in order.SubOrders)
             {
-                PrintOrders(subOrder);
+                PrintOrder(subOrder, maxLevel, maxNameLength);
             }
         }
     }
 
-    private static void PrintLine(string line)
-        => Console.WriteLine($"{line}{new string(' ', Console.WindowWidth - line.Length)}");
+    private static void PrintLine(string line, ConsoleColor? foreground = null, ConsoleColor? background = null)
+    {
+        if (foreground.HasValue)
+        {
+            Console.ForegroundColor = foreground.Value;
+        }
+
+        if (background.HasValue)
+        {
+            Console.BackgroundColor = background.Value;
+        }
+
+        Console.WriteLine($"{line}{new string(' ', Console.WindowWidth - line.Length)}");
+        Console.ResetColor();
+    }
 }

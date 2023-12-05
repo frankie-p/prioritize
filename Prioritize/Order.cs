@@ -24,6 +24,8 @@ public class Order
 
     public int DaysLeft { get; set; }
 
+    public int Deadline { get; set; }
+
     public List<int> ExternalProcesses { get; set; }
 
     public IEnumerable<Order> GetAllOrders()
@@ -36,7 +38,7 @@ public class Order
 
     public int GetEstimatedTime()
     {
-        var eta = 0;
+        var eta = DaysLeft; // shipping time or internal process time
 
         if (HasSubOrders)
         {
@@ -47,12 +49,11 @@ public class Order
         {
             eta += ExternalProcesses.Sum();
         }
-
-        eta += DaysLeft;
+        
         return eta;
     }
 
-    public override string ToString()
+    public string ToString(int itemNameLeftPadding)
     {
         var sb = new StringBuilder();
 
@@ -60,11 +61,11 @@ public class Order
 
         if (Level == 0)
         {
-            sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} ETA: {GetEstimatedTime()}");
+            sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
         }
         else
         {
-            sb.Append($"{new string(' ', Level * 2)} Item: {Item.Name} State: {state.ToUpper()} Count: {Count}");
+            sb.Append($"{Pad(Level * 2)} Item: {Pad(itemNameLeftPadding)}{Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
         }
 
         if (ProcessState != ProcessStates.Waiting)
@@ -74,4 +75,7 @@ public class Order
 
         return sb.ToString();
     }
+
+    private static string Pad(int count)
+        => new string(' ', count);
 }

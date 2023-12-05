@@ -23,7 +23,7 @@ Product GetCoupling()
                         {
                             Name = "W31-010",
                             Description = "GRIFFKERN",
-                            ExternalProcesses = new[] { 10, 5 },
+                            ExternalProcesses = new[] { 10, 5, 3 },
                             Items = [
                                 (new Item { Name = "W31-010R", Description = "GRIFFKERN", ShippingTime = shippingTimeFunc()}, 1)
                             ]
@@ -40,7 +40,7 @@ Product GetCoupling()
             {
                 Name = "32-0730",
                 Description = "DRUCKKNOPF",
-                ExternalProcesses = new[] { 5, 3, 2 },
+                ExternalProcesses = new[] { 5, 7, 3 },
                 Items = [
                     (new Item { Name = "32-0730R", Description = "DRUCKKNOPF", ShippingTime = shippingTimeFunc() }, 1)
                 ]
@@ -83,13 +83,13 @@ var inventory = new InventoryManager();
 var orderManager = new OrderManager(inventory);
 
 var simulator = new Simulator();
-simulator.AddOrder(orderManager.Create(GetCoupling(), 1));
+simulator.AddOrder(orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30));
 
 simulator.DayBegin += (s, e) =>
 {
-    if (simulator.OrderCount < 5)
+    if (simulator.OrderCount < 3)
     {
-        simulator.AddOrder(orderManager.Create(GetCoupling(), 1));
+        simulator.AddOrder(orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30));
     }
 };
 
