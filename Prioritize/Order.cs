@@ -34,6 +34,24 @@ public class Order
     public void SetParent(Order parent)
         => Parent = parent;
 
+    public int GetEstimatedTime()
+    {
+        var eta = 0;
+
+        if (HasSubOrders)
+        {
+            eta = SubOrders.Max(s => s.GetEstimatedTime());
+        }
+
+        if (ExternalProcesses != null)
+        {
+            eta += ExternalProcesses.Sum();
+        }
+
+        eta += DaysLeft;
+        return eta;
+    }
+
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -42,7 +60,7 @@ public class Order
 
         if (Level == 0)
         {
-            sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count}");
+            sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} ETA: {GetEstimatedTime()}");
         }
         else
         {
