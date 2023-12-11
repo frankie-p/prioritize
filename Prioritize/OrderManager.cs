@@ -22,6 +22,7 @@ public class OrderManager
     private Order Create(int orderId, ref int subOrderId, int level, Item item, int count, int deadline)
     {
         var subOrders = new List<Order>();
+        var currentSubOrderId = subOrderId++;
 
         if (item.HasItems)
         {
@@ -42,7 +43,7 @@ public class OrderManager
         var order = new Order
         {
             Id = orderId,
-            SubOrderId = subOrderId++,
+            SubOrderId = currentSubOrderId,
             Level = level,
             Item = item,
             Count = count,
