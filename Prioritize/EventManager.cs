@@ -58,5 +58,5 @@ public class EventManager
     }
 
     private void AddEntry(Events @event, int day, Order order)
-        => entries.Add(new(order.Id, day, @event, order.ToString(0)));
+        => entries.Add(new(order.Id, day, @event, order.ToString(0, padding: false)));
 }

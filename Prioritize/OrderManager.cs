@@ -13,9 +13,13 @@ public class OrderManager
     public int DeadlineReductionPerLevel { get; init; } = 10;
 
     public Order Create(Product product, int count, int deadline)
-        => Create(counter++, 0, product, count, deadline);
+    {
+        var subOrderId = 0;
+        var order = Create(counter++, ref subOrderId, 0, product, count, deadline);
+        return order;
+    }
 
-    private Order Create(int orderId, int level, Item item, int count, int deadline)
+    private Order Create(int orderId, ref int subOrderId, int level, Item item, int count, int deadline)
     {
         var subOrders = new List<Order>();
 
@@ -30,7 +34,7 @@ public class OrderManager
                 if (deadline - DeadlineReductionPerLevel <= 0)
                     throw new Exception("Invalid deadline");
 
-                var subOrder = Create(orderId, level + 1, subItem.Item, count - available, deadline - DeadlineReductionPerLevel);
+                var subOrder = Create(orderId, ref subOrderId, level + 1, subItem.Item, count - available, deadline - DeadlineReductionPerLevel);
                 subOrders.Add(subOrder);
             }
         }
@@ -38,6 +42,7 @@ public class OrderManager
         var order = new Order
         {
             Id = orderId,
+            SubOrderId = subOrderId++,
             Level = level,
             Item = item,
             Count = count,

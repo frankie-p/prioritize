@@ -7,7 +7,9 @@ public class Order
 
     public int Id { get; init; }
 
-    public int SubORderId { get; init; }
+    public int SubOrderId { get; init; }
+
+    public bool IsRootOrder => Parent == null;
 
     public int Level { get; init; }
 
@@ -62,11 +64,25 @@ public class Order
 
         if (Level == 0 || !padding)
         {
-            sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
+            if (IsRootOrder)
+            {
+                sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
+            }
+            else
+            {
+                sb.Append($"Id: {Id} SID: {SubOrderId} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
+            }
         }
         else
         {
-            sb.Append($"{Pad(Level * 2)} Item: {Pad(itemNameLeftPadding)}{Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
+            if (IsRootOrder)
+            {
+                sb.Append($"{Pad(Level * 2)} Item: {Pad(itemNameLeftPadding)}{Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
+            }
+            else
+            {
+                sb.Append($"{Pad(Level * 2)} SID: {SubOrderId} Item: {Pad(itemNameLeftPadding)}{Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
+            }
         }
 
         if (ProcessState != ProcessStates.Waiting)

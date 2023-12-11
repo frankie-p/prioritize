@@ -81,8 +81,10 @@ var inventory = new InventoryManager();
 
 var orderManager = new OrderManager(inventory);
 
+var order = orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30);
+
 var simulator = new Simulator();
-simulator.AddOrder(orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30));
+simulator.AddOrder(order);
 
 //simulator.DayBegin += (s, e) =>
 //{
