@@ -1,4 +1,4 @@
-﻿namespace Prio;
+﻿namespace Prioritize;
 
 public class OrderManager
 {

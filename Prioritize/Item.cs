@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Prio;
+namespace Prioritize;
 
 public class Item
 {

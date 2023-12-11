@@ -1,10 +1,12 @@
-﻿using System.Net.Security;
+﻿using static Prioritize.EventManager;
 
-namespace Prio;
+namespace Prioritize;
 
 public class Simulator
 {
     private readonly List<Order> orders = new();
+    private readonly EventManager events = new();
+    private int day;
 
     public event EventHandler<int> DayBegin;
 
@@ -15,13 +17,15 @@ public class Simulator
     public int OrderCount => orders.Count();
 
     public void AddOrder(Order order)
-        => orders.Add(order);
+    {
+        events.Add(day, order);
+        orders.Add(order);
+    }
 
     public async Task SimulateAsync()
     {
         var cursorBegin = Console.CursorTop;
         var cursorEnd = 0;
-        var day = 0;
         
         while (true)
         {
@@ -42,7 +46,15 @@ public class Simulator
 
             PrintOrders();
 
-            orders.RemoveAll(o => o.ProcessState == ProcessStates.Done);
+            orders.RemoveAll(o =>
+            {
+                if (o.ProcessState != ProcessStates.Done)
+                    return false;
+
+                events.Remove(day, o);
+                events.WriteAsync(o, $"order.{o.Id}.json");
+                return true;
+            });
 
             await Task.Delay(1000);
 
@@ -85,6 +97,7 @@ public class Simulator
             if (@internal.DaysLeft == 0)
             {
                 @internal.ProcessState = ProcessStates.Done;
+                events.InternalProcessEnd(day, @internal);
                 TryActivateParent(@internal);
             }
         }
@@ -101,6 +114,7 @@ public class Simulator
         {
             var prioritize = PrioritizingFunc(ordersInGoodsReceipt);
             ordersInGoodsReceipt.Remove(prioritize);
+            events.GoodsReceiptOutgoing(day, prioritize);
 
             // we can activate an order multiple times (external processes)
             if (!Activate(prioritize, false))
@@ -111,29 +125,32 @@ public class Simulator
         }
     }
 
-    private static void TryActivateParent(Order order)
+    private void TryActivateParent(Order order)
     {
         var parent = order.Parent;
 
         if (parent != null && parent.SubOrders.All(s => s.ProcessState == ProcessStates.Done))
         {
             Activate(parent, true);
+            events.Activate(day, parent);
         }
     }
 
-    private static bool Activate(Order order, bool throwException)
+    private bool Activate(Order order, bool throwException)
     {
         if (order.ExternalProcesses != null && order.ExternalProcesses.Any())
         {
             order.ProcessState = ProcessStates.External;
             order.DaysLeft = order.ExternalProcesses.First();
             order.ExternalProcesses.RemoveAt(0);
+            events.ExternalProcessBegin(day, order);
             return true;
         }
         
         if (order.DaysLeft > 0)
         {
             order.ProcessState = ProcessStates.Internal;
+            events.InternalProcessBegin(day, order);
             return true;
         }
 
@@ -142,7 +159,7 @@ public class Simulator
             : false;
     }
 
-    private static void DoShippings(Order order)
+    private void DoShippings(Order order)
     {
         var shippings = order
             .GetAllOrders()
@@ -156,11 +173,12 @@ public class Simulator
             if (shipping.DaysLeft == 0)
             {
                 shipping.ProcessState = ProcessStates.GoodsReceipt;
+                events.GoodsReceiptIncoming(day, shipping);
             }
         }
     }
 
-    private static void DoPurchases(Order order)
+    private void DoPurchases(Order order)
     {
         var purchases = order
             .GetAllOrders()
@@ -169,11 +187,15 @@ public class Simulator
         foreach (var purchase in purchases)
         {
             purchase.ProcessState = ProcessStates.Shipping;
+            events.Purchase(day, purchase);
         }
     }
 
     private void PrintOrders()
     {
+        if (!orders.Any())
+            return;
+
         var maxLevel = orders.Max(s => s.GetAllOrders().Max(o => o.Level));
         var maxNameLength = orders.Max(s => s.GetAllOrders().Max(o => o.Item.Name.Length));
 

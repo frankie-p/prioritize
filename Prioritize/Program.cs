@@ -1,5 +1,4 @@
-﻿
-using Prio;
+﻿using Prioritize;
 
 Product GetCoupling()
 {
@@ -85,12 +84,12 @@ var orderManager = new OrderManager(inventory);
 var simulator = new Simulator();
 simulator.AddOrder(orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30));
 
-simulator.DayBegin += (s, e) =>
-{
-    if (simulator.OrderCount < 3)
-    {
-        simulator.AddOrder(orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30));
-    }
-};
+//simulator.DayBegin += (s, e) =>
+//{
+//    if (simulator.OrderCount < 3)
+//    {
+//        simulator.AddOrder(orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30));
+//    }
+//};
 
 await simulator.SimulateAsync();

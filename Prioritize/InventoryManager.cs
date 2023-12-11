@@ -1,4 +1,5 @@
-﻿namespace Prio;
+﻿namespace Prioritize;
+
 public class InventoryManager
 {
 

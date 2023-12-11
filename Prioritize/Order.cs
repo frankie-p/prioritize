@@ -1,12 +1,13 @@
-﻿
-using System.Text;
+﻿using System.Text;
 
-namespace Prio;
+namespace Prioritize;
 
 public class Order
 {
 
     public int Id { get; init; }
+
+    public int SubORderId { get; init; }
 
     public int Level { get; init; }
 
@@ -53,13 +54,13 @@ public class Order
         return eta;
     }
 
-    public string ToString(int itemNameLeftPadding)
+    public string ToString(int itemNameLeftPadding, bool padding = true)
     {
         var sb = new StringBuilder();
 
         var state = ProcessState.ToString().PadRight(8, ' ');
 
-        if (Level == 0)
+        if (Level == 0 || !padding)
         {
             sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
         }
