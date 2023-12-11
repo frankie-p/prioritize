@@ -77,7 +77,7 @@ public class Simulator
 
     private void DecrementDeadline(Order order)
     {
-        foreach (var o in order.GetAllOrders())
+        foreach (var o in order.GetAllOrders().Where(o => o.ProcessState != ProcessStates.Done))
         {
             o.Deadline--;
         }

@@ -56,43 +56,47 @@ public class Order
         return eta;
     }
 
-    public string ToString(int itemNameLeftPadding, bool padding = true)
+    public string ToString(int itemNameLeftPadding, bool padding = true, bool printIds = true)
     {
         var sb = new StringBuilder();
 
-        var state = ProcessState.ToString().PadRight(8, ' ');
+        var state = padding
+            ? ProcessState.ToString().PadRight(8, ' ')
+            : ProcessState.ToString();
 
-        if (Level == 0 || !padding)
+        if (Level != 0 && padding)
         {
-            if (IsRootOrder)
-            {
-                sb.Append($"Id: {Id} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
-            }
-            else
-            {
-                sb.Append($"Id: {Id} SID: {SubOrderId} Item: {Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
-            }
-        }
-        else
-        {
-            if (IsRootOrder)
-            {
-                sb.Append($"{Pad(Level * 2)} Item: {Pad(itemNameLeftPadding)}{Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
-            }
-            else
-            {
-                sb.Append($"{Pad(Level * 2)} SID: {SubOrderId} Item: {Pad(itemNameLeftPadding)}{Item.Name} State: {state.ToUpper()} Count: {Count} DL: {Deadline} ETA: {GetEstimatedTime()}");
-            }
+            sb.Append($"{Pad(Level * 2, ' ')}");
         }
 
-        if (ProcessState != ProcessStates.Waiting)
+        if (IsRootOrder && printIds)
         {
-            sb.Append($" Left: {DaysLeft}");
+            sb.Append($"Id: {Id}");
         }
+        else if (printIds)
+        {
+            sb.Append($"SID: {SubOrderId}");
+        }
+
+        if (sb.Length > 0)
+        {
+            sb.Append(' ');
+        }
+
+        if (Level != 0 && padding)
+        {
+            sb.Append(Pad(itemNameLeftPadding));
+        }
+
+        sb.Append(Item.Name);
+        sb.Append($" State: {state.ToUpper()}");
+        sb.Append($" Count: {Count}");
+        sb.Append($" DL: {Deadline}");
+        sb.Append($" ETA: {GetEstimatedTime()}");
 
         return sb.ToString();
     }
 
-    private static string Pad(int count)
-        => new string(' ', count);
+    private static string Pad(int count, char c = ' ')
+        => new string(c, count);
 }
