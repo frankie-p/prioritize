@@ -56,7 +56,7 @@ public class OrderManager
                         : 0,
             ExternalProcesses = item.ExternalProcesses == null
                 ? null
-                : new List<int>(item.ExternalProcesses),
+                : new(item.ExternalProcesses.Select(e => new ExternalProcess(e.External, e.Internal))),
             SubOrders = subOrders.Any()
                 ? subOrders
                 : null

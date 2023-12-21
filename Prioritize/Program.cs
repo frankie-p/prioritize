@@ -1,5 +1,33 @@
 ﻿using Prioritize;
 
+Product GetSimple()
+{
+    Func<int> shippingTimeFunc = () => (int)Rand.Generate(10, 3);
+
+    var coupling = new Product
+    {
+        Name = "W32-397",
+        Description = "WEB A Kupplung",
+        InternalProcessTime = 5,
+        Items = [
+        (
+            new Item
+                        {
+                            Name = "W31-010",
+                            Description = "GRIFFKERN",
+                            ExternalProcesses = new[] { (10, 1), (5, 1), (3, 1) },
+                            Items = [
+                                (new Item { Name = "W31-010R", Description = "GRIFFKERN", ShippingTime = shippingTimeFunc()}, 1)
+                            ]
+                        },
+            1
+        )
+    ]
+    };
+
+    return coupling;
+}
+
 Product GetCoupling()
 {
     Func<int> shippingTimeFunc = () => (int)Rand.Generate(10, 3);
@@ -22,7 +50,7 @@ Product GetCoupling()
                         {
                             Name = "W31-010",
                             Description = "GRIFFKERN",
-                            ExternalProcesses = new[] { 10, 5, 3 },
+                            ExternalProcesses = new[] { (10, 1), (5, 1), (3, 1) },
                             Items = [
                                 (new Item { Name = "W31-010R", Description = "GRIFFKERN", ShippingTime = shippingTimeFunc()}, 1)
                             ]
@@ -39,7 +67,7 @@ Product GetCoupling()
             {
                 Name = "32-0730",
                 Description = "DRUCKKNOPF",
-                ExternalProcesses = new[] { 5, 7, 3 },
+                ExternalProcesses = new[] { (5, 1), (7, 1), (3, 1) },
                 Items = [
                     (new Item { Name = "32-0730R", Description = "DRUCKKNOPF", ShippingTime = shippingTimeFunc() }, 1)
                 ]
@@ -81,7 +109,7 @@ var inventory = new InventoryManager();
 
 var orderManager = new OrderManager(inventory);
 
-var order = orderManager.Create(GetCoupling(), 1, Rand.Next(20) + 30);
+var order = orderManager.Create(GetSimple(), 1, Rand.Next(20) + 30);
 
 var simulator = new Simulator();
 simulator.AddOrder(order);

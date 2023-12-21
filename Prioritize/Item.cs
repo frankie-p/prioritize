@@ -15,7 +15,7 @@ public class Item
 
     public int InternalProcessTime { get; init; }
 
-    public IEnumerable<int> ExternalProcesses { get; init; }
+    public IEnumerable<(int External, int Internal)> ExternalProcesses { get; init; }
 
     [JsonIgnore]
     public bool HasItems => Items != null;

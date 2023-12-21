@@ -39,8 +39,8 @@ public class Simulator
             {
                 DoPurchases(order);
                 DoShippings(order);
-                DoGoodsReceipt(order);
                 DoInternalProcesses(order);
+                DoGoodsReceipt(order);
                 DecrementDeadline(order);
             }
 
@@ -98,7 +98,12 @@ public class Simulator
             {
                 @internal.ProcessState = ProcessStates.Done;
                 events.InternalProcessEnd(day, @internal);
-                TryActivateParent(@internal);
+
+                // try activate next external process
+                if (!Activate(@internal, false))
+                {
+                    TryActivateParent(@internal);
+                }                
             }
         }
     }
@@ -140,10 +145,34 @@ public class Simulator
     {
         if (order.ExternalProcesses != null && order.ExternalProcesses.Any())
         {
-            order.ProcessState = ProcessStates.External;
-            order.DaysLeft = order.ExternalProcesses.First();
-            order.ExternalProcesses.RemoveAt(0);
-            events.ExternalProcessBegin(day, order);
+            var extAndIntProcessTime = order.ExternalProcesses.First();
+            
+            if (extAndIntProcessTime.ExternalProcessTime > 0)
+            {
+                order.ProcessState = ProcessStates.External;
+                order.DaysLeft = extAndIntProcessTime.ExternalProcessTime;
+                events.ExternalProcessBegin(day, order);
+
+                if (extAndIntProcessTime.InternalProcessTime == 0)
+                {
+                    order.ExternalProcesses.RemoveAt(0);
+                }
+                else
+                {
+                    extAndIntProcessTime.ExternalProcessTime = 0;
+                }
+            }
+            else
+            {
+                if (extAndIntProcessTime.InternalProcessTime == 0)
+                    throw new Exception("this should not happen");
+
+                order.ProcessState = ProcessStates.Internal;
+                order.DaysLeft = extAndIntProcessTime.InternalProcessTime;
+                events.InternalProcessBegin(day, order);
+                order.ExternalProcesses.RemoveAt(0);
+            }
+            
             return true;
         }
         

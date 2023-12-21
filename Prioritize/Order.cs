@@ -2,9 +2,22 @@
 
 namespace Prioritize;
 
+public class ExternalProcess
+{
+    public ExternalProcess(int externalProcessTime, int internalProcessTime)
+    {
+        ExternalProcessTime = externalProcessTime;
+        InternalProcessTime = internalProcessTime;
+    }
+
+    public int ExternalProcessTime { get; set; }
+
+    public int InternalProcessTime { get; }
+}
+
 public class Order
 {
-
+    
     public int Id { get; init; }
 
     public int SubOrderId { get; init; }
@@ -29,7 +42,7 @@ public class Order
 
     public int Deadline { get; set; }
 
-    public List<int> ExternalProcesses { get; set; }
+    public List<ExternalProcess> ExternalProcesses { get; set; }
 
     public IEnumerable<Order> GetAllOrders()
         => HasSubOrders
@@ -43,14 +56,16 @@ public class Order
     {
         var eta = DaysLeft; // shipping time or internal process time
 
-        if (HasSubOrders)
+        if (HasSubOrders && SubOrders.Any(s => s.ProcessState != ProcessStates.Done))
         {
-            eta = SubOrders.Max(s => s.GetEstimatedTime());
+            eta = SubOrders
+                .Where(s => s.ProcessState != ProcessStates.Done)
+                .Max(s => s.GetEstimatedTime());
         }
 
         if (ExternalProcesses != null)
         {
-            eta += ExternalProcesses.Sum();
+            eta += ExternalProcesses.Sum(p => p.ExternalProcessTime + p.InternalProcessTime);
         }
         
         return eta;
